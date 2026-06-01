@@ -80,4 +80,30 @@ class FundCatalogServiceTest {
         assertEquals(36, cats.sumOf { it.count })
         assertEquals(12, cats.first { it.category == "EQUITY" }.count)
     }
+
+    @Test
+    fun `sub-categories list distinct fund types with counts`() {
+        val subs = service.subCategories()
+        assertEquals(36, subs.sumOf { it.count })
+        val smallCap = subs.first { it.subCategory == "Small Cap" }
+        assertEquals("EQUITY", smallCap.category)
+        assertEquals(2, smallCap.count) // SBI + Nippon
+        assertEquals(3, subs.first { it.subCategory == "Large Cap" }.count)
+    }
+
+    @Test
+    fun `search filters by sub-category`() {
+        val smallCaps = service.search(null, FundCategory.EQUITY, null, null, 0, 50, "Small Cap")
+        assertEquals(2, smallCaps.totalElements)
+        assertTrue(smallCaps.content.all { it.subCategory == "Small Cap" })
+    }
+
+    @Test
+    fun `compare returns the requested funds in order and skips unknown ids`() {
+        val smallCapIds = funds.findAll().filter { it.subCategory == "Small Cap" }.map { it.id }
+        val result = service.compare(smallCapIds)
+        assertEquals(smallCapIds.map { it.toString() }, result.map { it.id })
+        assertEquals(1, service.compare(listOf(smallCapIds.first(), UUID.randomUUID())).size) // unknown skipped
+        assertTrue(service.compare(emptyList()).isEmpty())
+    }
 }

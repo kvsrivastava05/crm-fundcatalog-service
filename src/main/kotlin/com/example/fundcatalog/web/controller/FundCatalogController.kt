@@ -8,6 +8,7 @@ import com.example.fundcatalog.web.dto.FundCard
 import com.example.fundcatalog.web.dto.FundDetail
 import com.example.fundcatalog.web.dto.NavPointDto
 import com.example.fundcatalog.web.dto.PageResponse
+import com.example.fundcatalog.web.dto.SubCategoryCount
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,6 +37,7 @@ class FundCatalogController(
     fun search(
         @RequestParam(required = false) q: String?,
         @RequestParam(required = false) category: FundCategory?,
+        @RequestParam(required = false) subCategory: String?,
         @RequestParam(required = false) risk: RiskLevel?,
         @RequestParam(required = false) sort: String?,
         @RequestParam(defaultValue = "0") page: Int,
@@ -43,13 +45,25 @@ class FundCatalogController(
     ): ResponseEntity<PageResponse<FundCard>> =
         ResponseEntity.ok()
             .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic())
-            .body(service.search(q, category, risk, sort, page, size))
+            .body(service.search(q, category, risk, sort, page, size, subCategory))
 
     @GetMapping("/categories")
     fun categories(): ResponseEntity<List<CategoryCount>> =
         ResponseEntity.ok()
             .cacheControl(CacheControl.maxAge(Duration.ofHours(1)).cachePublic())
             .body(service.categories())
+
+    @GetMapping("/subcategories")
+    fun subCategories(): ResponseEntity<List<SubCategoryCount>> =
+        ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(Duration.ofHours(1)).cachePublic())
+            .body(service.subCategories())
+
+    @GetMapping("/compare")
+    fun compare(@RequestParam ids: List<UUID>): ResponseEntity<List<FundDetail>> =
+        ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic())
+            .body(service.compare(ids))
 
     @GetMapping("/{id}")
     fun detail(@PathVariable id: UUID): FundDetail = service.detail(id)

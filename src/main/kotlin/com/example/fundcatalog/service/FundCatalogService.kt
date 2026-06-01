@@ -11,6 +11,7 @@ import com.example.fundcatalog.web.dto.FundCard
 import com.example.fundcatalog.web.dto.FundDetail
 import com.example.fundcatalog.web.dto.NavPointDto
 import com.example.fundcatalog.web.dto.PageResponse
+import com.example.fundcatalog.web.dto.SubCategoryCount
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.domain.Specification
@@ -27,9 +28,9 @@ class FundCatalogService(
 ) {
 
     /** Paged, sorted, filtered explore search over the fund universe. */
-    fun search(q: String?, category: FundCategory?, risk: RiskLevel?, sort: String?, page: Int, size: Int): PageResponse<FundCard> {
+    fun search(q: String?, category: FundCategory?, risk: RiskLevel?, sort: String?, page: Int, size: Int, subCategory: String? = null): PageResponse<FundCard> {
         val pageable = PageRequest.of(page, size, sortFor(sort))
-        val result = funds.findAll(specFor(q, category, risk), pageable)
+        val result = funds.findAll(specFor(q, category, risk, subCategory), pageable)
         return PageResponse(
             content = result.content.map(::toCard),
             page = result.number,
@@ -42,6 +43,22 @@ class FundCatalogService(
     }
 
     fun detail(id: UUID): FundDetail = toDetail(load(id))
+
+    /** Fund "types" (sub-categories) with counts, for browse-by-type chips. Reference data is tiny
+     *  and cached, so grouping in memory keeps this portable across databases. */
+    fun subCategories(): List<SubCategoryCount> =
+        funds.findAll()
+            .groupingBy { it.category.name to it.subCategory }
+            .eachCount()
+            .map { (key, count) -> SubCategoryCount(key.first, key.second, count.toLong()) }
+            .sortedWith(compareBy({ it.category }, { -it.count }, { it.subCategory }))
+
+    /** Fetch several funds (preserving the requested order, skipping unknown ids) for side-by-side
+     *  comparison of funds of the same type. */
+    fun compare(ids: List<UUID>): List<FundDetail> {
+        val byId = funds.findAllById(ids).associateBy { it.id }
+        return ids.mapNotNull { byId[it] }.map(::toDetail)
+    }
 
     /** NAV series for the detail chart, trimmed to the requested range (MAX = full history). */
     fun navHistory(id: UUID, range: String?): List<NavPointDto> {
@@ -65,9 +82,10 @@ class FundCatalogService(
         funds.findById(id).orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "fund not found") }
 
     /** Combine only the filters that are actually set, so absent ones add no SQL (null spec = all). */
-    private fun specFor(q: String?, category: FundCategory?, risk: RiskLevel?): Specification<CatalogFund>? {
+    private fun specFor(q: String?, category: FundCategory?, risk: RiskLevel?, subCategory: String?): Specification<CatalogFund>? {
         val specs = mutableListOf<Specification<CatalogFund>>()
         if (category != null) specs.add(Specification { root, _, cb -> cb.equal(root.get<FundCategory>("category"), category) })
+        if (subCategory != null) specs.add(Specification { root, _, cb -> cb.equal(root.get<String>("subCategory"), subCategory) })
         if (risk != null) specs.add(Specification { root, _, cb -> cb.equal(root.get<RiskLevel>("riskLevel"), risk) })
         val term = q?.trim()?.ifBlank { null }
         if (term != null) {

@@ -76,6 +76,16 @@ class FundCatalogMvcTest {
     }
 
     @Test
+    fun `sub-categories, compare and sub-category filter work`() {
+        assertEquals(200, status("/funds/subcategories", auth()))
+        assertEquals(200, status("/funds?subCategory=ELSS", auth()))
+        val ids = funds.findAll().take(2).joinToString(",") { it.id.toString() }
+        val compare = mvc.perform(get("/funds/compare?ids=$ids").headers(auth())).andReturn().response
+        assertEquals(200, compare.status)
+        assertEquals(400, status("/funds/compare?ids=not-a-uuid", auth())) // bad UUID -> 400
+    }
+
+    @Test
     fun `requests without a valid token are 401`() {
         assertEquals(401, status("/funds"))
         assertEquals(401, mvc.perform(get("/funds").header("Authorization", "Bearer garbage")).andReturn().response.status)

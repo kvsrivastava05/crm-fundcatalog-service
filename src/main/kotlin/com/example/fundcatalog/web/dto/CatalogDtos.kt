@@ -63,3 +63,11 @@ data class CategoryCount(
     val category: String,
     val count: Long,
 )
+
+/** A fund "type" (sub-category like Small Cap / Large Cap) with its fund count — drives the
+ *  "browse by type" chips and the compare-similar-funds flow. */
+data class SubCategoryCount(
+    val category: String,
+    val subCategory: String,
+    val count: Long,
+)
