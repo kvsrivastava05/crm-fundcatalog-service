@@ -12,9 +12,11 @@ import java.util.UUID
 // filters add no SQL at all — avoids binding untyped NULL params, which Postgres rejects.
 interface CatalogFundRepository : JpaRepository<CatalogFund, UUID>, JpaSpecificationExecutor<CatalogFund> {
     fun countByCategory(category: FundCategory): Long
+    fun findByAmfiSchemeCodeIsNotNull(): List<CatalogFund>
 }
 
 interface NavPointRepository : JpaRepository<NavPoint, UUID> {
     fun findByFundIdOrderByDateAsc(fundId: UUID): List<NavPoint>
     fun findByFundIdAndDateGreaterThanEqualOrderByDateAsc(fundId: UUID, date: LocalDate): List<NavPoint>
+    fun existsByFundIdAndDate(fundId: UUID, date: LocalDate): Boolean
 }

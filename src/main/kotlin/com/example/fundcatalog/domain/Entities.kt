@@ -36,12 +36,13 @@ class CatalogFund(
     val return1y: BigDecimal,
     val return3y: BigDecimal,
     val return5y: BigDecimal,
-    val currentNav: BigDecimal,
-    val navDate: LocalDate,
+    var currentNav: BigDecimal, // updated by the AMFI nightly NAV ingestion
+    var navDate: LocalDate,
     val benchmark: String,
     val fundManager: String,
     val minSip: Int,
     val minLumpsum: Int,
+    val amfiSchemeCode: String? = null, // links to the real AMFI scheme for live NAVs (null = seeded only)
 )
 
 /** One NAV observation for a fund on a date — drives the fund-detail NAV chart. */

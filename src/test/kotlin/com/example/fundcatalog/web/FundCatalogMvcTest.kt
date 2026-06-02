@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
@@ -83,6 +84,14 @@ class FundCatalogMvcTest {
         val compare = mvc.perform(get("/funds/compare?ids=$ids").headers(auth())).andReturn().response
         assertEquals(200, compare.status)
         assertEquals(400, status("/funds/compare?ids=not-a-uuid", auth())) // bad UUID -> 400
+    }
+
+    @Test
+    fun `admin ingest-nav endpoint runs and reports a result`() {
+        // test AMFI url is a dead address, so it reports fetched=false without hitting the network
+        val res = mvc.perform(post("/funds/admin/ingest-nav").headers(auth())).andReturn().response
+        assertEquals(200, res.status)
+        assertTrue(res.contentAsString.contains("\"fetched\":false"))
     }
 
     @Test

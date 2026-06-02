@@ -17,6 +17,7 @@ class FundCatalogApplicationTests {
     fun `context loads and seeds the fund universe with NAV history`() {
         assertEquals(36L, funds.count())
         assertEquals(36L * 37, navPoints.count()) // 37 monthly points per fund
+        assertEquals(32, funds.findByAmfiSchemeCodeIsNotNull().size) // 32 funds linked to real AMFI schemes
     }
 
     @Test

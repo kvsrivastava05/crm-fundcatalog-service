@@ -3,9 +3,11 @@ package com.example.fundcatalog.web.controller
 import com.example.fundcatalog.domain.FundCategory
 import com.example.fundcatalog.domain.RiskLevel
 import com.example.fundcatalog.service.FundCatalogService
+import com.example.fundcatalog.service.NavIngestionService
 import com.example.fundcatalog.web.dto.CategoryCount
 import com.example.fundcatalog.web.dto.FundCard
 import com.example.fundcatalog.web.dto.FundDetail
+import com.example.fundcatalog.web.dto.IngestionResult
 import com.example.fundcatalog.web.dto.NavPointDto
 import com.example.fundcatalog.web.dto.PageResponse
 import com.example.fundcatalog.web.dto.SubCategoryCount
@@ -13,6 +15,7 @@ import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -28,10 +31,15 @@ import java.util.UUID
 @RequestMapping("/funds")
 class FundCatalogController(
     private val service: FundCatalogService,
+    private val ingestion: NavIngestionService,
 ) {
 
     @GetMapping("/health")
     fun health(): Map<String, String> = mapOf("status" to "ok")
+
+    /** Manually trigger a refresh of NAVs from AMFI (the scheduler also runs this nightly). */
+    @PostMapping("/admin/ingest-nav")
+    fun ingestNav(): IngestionResult = ingestion.ingest()
 
     @GetMapping
     fun search(
