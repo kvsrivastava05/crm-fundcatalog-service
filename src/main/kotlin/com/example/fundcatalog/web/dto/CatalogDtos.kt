@@ -71,18 +71,3 @@ data class SubCategoryCount(
     val subCategory: String,
     val count: Long,
 )
-
-/** One parsed row from the AMFI NAV file. */
-data class AmfiNav(
-    val schemeCode: String,
-    val nav: BigDecimal,
-    val date: LocalDate,
-)
-
-/** Summary of a NAV ingestion run, returned by the admin trigger endpoint. */
-data class IngestionResult(
-    val fetched: Boolean,        // did we successfully download the AMFI file?
-    val schemesParsed: Int,      // rows parsed from the file
-    val fundsUpdated: Int,       // catalog funds whose NAV was refreshed
-    val navPointsAdded: Int,     // new history points appended
-)

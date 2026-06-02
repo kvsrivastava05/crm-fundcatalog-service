@@ -18,5 +18,4 @@ interface CatalogFundRepository : JpaRepository<CatalogFund, UUID>, JpaSpecifica
 interface NavPointRepository : JpaRepository<NavPoint, UUID> {
     fun findByFundIdOrderByDateAsc(fundId: UUID): List<NavPoint>
     fun findByFundIdAndDateGreaterThanEqualOrderByDateAsc(fundId: UUID, date: LocalDate): List<NavPoint>
-    fun existsByFundIdAndDate(fundId: UUID, date: LocalDate): Boolean
 }
