@@ -6,6 +6,7 @@ import com.example.fundcatalog.service.FundCatalogService
 import com.example.fundcatalog.web.dto.CategoryCount
 import com.example.fundcatalog.web.dto.FundCard
 import com.example.fundcatalog.web.dto.FundDetail
+import com.example.fundcatalog.web.dto.MarketPulseResponse
 import com.example.fundcatalog.web.dto.NavPointDto
 import com.example.fundcatalog.web.dto.PageResponse
 import com.example.fundcatalog.web.dto.SubCategoryCount
@@ -64,6 +65,13 @@ class FundCatalogController(
         ResponseEntity.ok()
             .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic())
             .body(service.compare(ids))
+
+    /** Market pulse: latest NAV date, top recent gainers/losers and category moves. */
+    @GetMapping("/movers")
+    fun movers(@RequestParam(defaultValue = "5") limit: Int): ResponseEntity<MarketPulseResponse> =
+        ResponseEntity.ok()
+            .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic())
+            .body(service.marketPulse(limit))
 
     @GetMapping("/{id}")
     fun detail(@PathVariable id: UUID): FundDetail = service.detail(id)

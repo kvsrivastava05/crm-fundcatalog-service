@@ -76,6 +76,16 @@ class FundCatalogMvcTest {
     }
 
     @Test
+    fun `market pulse returns gainers, losers and a cache header`() {
+        val res = mvc.perform(get("/funds/movers?limit=4").headers(auth())).andReturn().response
+        assertEquals(200, res.status)
+        assertTrue(res.contentAsString.contains("topGainers"))
+        assertTrue(res.contentAsString.contains("categoryMovers"))
+        assertNotNull(res.getHeader("Cache-Control"))
+        assertEquals(401, status("/funds/movers")) // gated
+    }
+
+    @Test
     fun `sub-categories, compare and sub-category filter work`() {
         assertEquals(200, status("/funds/subcategories", auth()))
         assertEquals(200, status("/funds?subCategory=ELSS", auth()))

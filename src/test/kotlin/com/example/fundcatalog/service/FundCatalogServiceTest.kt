@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.web.server.ResponseStatusException
+import java.time.LocalDate
 import java.util.UUID
 
 @SpringBootTest
@@ -96,6 +97,22 @@ class FundCatalogServiceTest {
         val smallCaps = service.search(null, FundCategory.EQUITY, null, null, 0, 50, "Small Cap")
         assertEquals(2, smallCaps.totalElements)
         assertTrue(smallCaps.content.all { it.subCategory == "Small Cap" })
+    }
+
+    @Test
+    fun `market pulse ranks recent gainers, losers and category moves`() {
+        val pulse = service.marketPulse(5)
+        assertEquals(36, pulse.fundCount)
+        assertEquals(5, pulse.topGainers.size)
+        assertEquals(5, pulse.topLosers.size)
+        assertEquals(8, pulse.categoryMovers.size)
+        assertTrue(pulse.asOf != null && !pulse.asOf!!.isAfter(LocalDate.now()))
+        // gainers high-to-low, losers low-to-high, the best gainer beats the worst loser
+        assertTrue(pulse.topGainers.zipWithNext().all { (a, b) -> a.changePct >= b.changePct })
+        assertTrue(pulse.topLosers.zipWithNext().all { (a, b) -> a.changePct <= b.changePct })
+        assertTrue(pulse.topGainers.first().changePct >= pulse.topLosers.first().changePct)
+        assertTrue(pulse.categoryMovers.zipWithNext().all { (a, b) -> a.avgChangePct >= b.avgChangePct })
+        assertTrue(pulse.topGainers.first().name.isNotBlank() && pulse.topGainers.first().rating in 1..5)
     }
 
     @Test

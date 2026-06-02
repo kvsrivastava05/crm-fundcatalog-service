@@ -7,8 +7,11 @@ import com.example.fundcatalog.domain.RiskLevel
 import com.example.fundcatalog.repository.CatalogFundRepository
 import com.example.fundcatalog.repository.NavPointRepository
 import com.example.fundcatalog.web.dto.CategoryCount
+import com.example.fundcatalog.web.dto.CategoryMover
 import com.example.fundcatalog.web.dto.FundCard
 import com.example.fundcatalog.web.dto.FundDetail
+import com.example.fundcatalog.web.dto.FundMover
+import com.example.fundcatalog.web.dto.MarketPulseResponse
 import com.example.fundcatalog.web.dto.NavPointDto
 import com.example.fundcatalog.web.dto.PageResponse
 import com.example.fundcatalog.web.dto.SubCategoryCount
@@ -18,6 +21,8 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -59,6 +64,37 @@ class FundCatalogService(
         val byId = funds.findAllById(ids).associateBy { it.id }
         return ids.mapNotNull { byId[it] }.map(::toDetail)
     }
+
+    /**
+     * Market pulse / latest update: each fund's recent move (latest NAV vs ~1 month earlier), then
+     * the biggest gainers, losers and average category moves across the universe. Built from the NAV
+     * history so it reflects the daily NAV refresh; the desk view for owners and employees.
+     */
+    fun marketPulse(limit: Int): MarketPulseResponse {
+        val rated = funds.findAll()
+            .map { it to navPoints.findByFundIdOrderByDateAsc(it.id) }
+            .filter { it.second.size >= 2 }
+            .map { (f, points) ->
+                val latest = points.last()
+                val prior = points.lastOrNull { p -> !p.date.isAfter(latest.date.minusDays(30)) } ?: points.first()
+                val change = latest.nav.subtract(prior.nav)
+                    .divide(prior.nav, 6, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal(100)).toDouble()
+                Triple(f, latest.date, change)
+            }
+        val asOf = rated.maxByOrNull { it.second }?.second
+        val gainers = rated.sortedByDescending { it.third }.take(limit).map { toMover(it.first, it.third) }
+        val losers = rated.sortedBy { it.third }.take(limit).map { toMover(it.first, it.third) }
+        val categoryMovers = rated.groupBy { it.first.category.name }
+            .map { (cat, list) -> CategoryMover(cat, list.map { it.third }.average(), list.size) }
+            .sortedByDescending { it.avgChangePct }
+        return MarketPulseResponse(asOf, rated.size, gainers, losers, categoryMovers)
+    }
+
+    private fun toMover(f: CatalogFund, changePct: Double) = FundMover(
+        id = f.id.toString(), name = f.name, amc = f.amc, category = f.category.name,
+        currentNav = f.currentNav, changePct = changePct, return1y = f.return1y, rating = f.rating,
+    )
 
     /** NAV series for the detail chart, trimmed to the requested range (MAX = full history). */
     fun navHistory(id: UUID, range: String?): List<NavPointDto> {

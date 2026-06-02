@@ -71,3 +71,32 @@ data class SubCategoryCount(
     val subCategory: String,
     val count: Long,
 )
+
+/** One fund's recent move (latest NAV vs ~1 month ago) for the market-pulse desk view. */
+data class FundMover(
+    val id: String,
+    val name: String,
+    val amc: String,
+    val category: String,
+    val currentNav: BigDecimal,
+    val changePct: Double,
+    val return1y: BigDecimal,
+    val rating: Int,
+)
+
+/** Average recent move across a category, for the market-pulse category strip. */
+data class CategoryMover(
+    val category: String,
+    val avgChangePct: Double,
+    val fundCount: Int,
+)
+
+/** Market pulse / latest update: data freshness plus the biggest recent gainers, losers and
+ *  category moves across the fund universe. Owners and employees use this as a desk dashboard. */
+data class MarketPulseResponse(
+    val asOf: LocalDate?,
+    val fundCount: Int,
+    val topGainers: List<FundMover>,
+    val topLosers: List<FundMover>,
+    val categoryMovers: List<CategoryMover>,
+)
