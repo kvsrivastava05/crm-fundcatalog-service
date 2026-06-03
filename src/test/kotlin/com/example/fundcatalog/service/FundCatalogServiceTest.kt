@@ -21,14 +21,14 @@ class FundCatalogServiceTest {
     @Test
     fun `default search paginates over the whole universe`() {
         val page0 = service.search(null, null, null, null, 0, 12)
-        assertEquals(36, page0.totalElements)
-        assertEquals(3, page0.totalPages)
+        assertEquals(50, page0.totalElements)
+        assertEquals(5, page0.totalPages)
         assertEquals(12, page0.content.size)
         assertTrue(page0.hasNext)
         assertTrue(!page0.hasPrev)
         // default sort is best 1Y first
         assertTrue(page0.content[0].return1y >= page0.content[1].return1y)
-        val last = service.search(null, null, null, null, 2, 12)
+        val last = service.search(null, null, null, null, 4, 12)
         assertTrue(last.hasPrev)
         assertTrue(!last.hasNext)
     }
@@ -44,13 +44,13 @@ class FundCatalogServiceTest {
 
     @Test
     fun `filters by free-text, category and risk - blank query is ignored`() {
-        assertEquals(36, service.search("   ", null, null, null, 0, 50).totalElements) // blank -> null
+        assertEquals(50, service.search("   ", null, null, null, 0, 50).totalElements) // blank -> null
         val axis = service.search("axis", null, null, null, 0, 50)
-        assertEquals(3, axis.totalElements)
+        assertEquals(4, axis.totalElements)
         assertTrue(axis.content.all { it.name.contains("Axis", true) || it.amc.contains("Axis", true) })
-        assertEquals(12, service.search(null, FundCategory.EQUITY, null, null, 0, 50).totalElements)
-        assertEquals(2, service.search(null, null, RiskLevel.LOW, null, 0, 50).totalElements) // the two liquid funds
-        assertEquals(2, service.search(null, FundCategory.LIQUID, RiskLevel.LOW, null, 0, 50).totalElements)
+        assertEquals(18, service.search(null, FundCategory.EQUITY, null, null, 0, 50).totalElements)
+        assertEquals(3, service.search(null, null, RiskLevel.LOW, null, 0, 50).totalElements) // the three liquid funds
+        assertEquals(3, service.search(null, FundCategory.LIQUID, RiskLevel.LOW, null, 0, 50).totalElements)
     }
 
     @Test
@@ -78,31 +78,31 @@ class FundCatalogServiceTest {
     fun `categories lists every non-empty category and counts add up`() {
         val cats = service.categories()
         assertEquals(8, cats.size)
-        assertEquals(36, cats.sumOf { it.count })
-        assertEquals(12, cats.first { it.category == "EQUITY" }.count)
+        assertEquals(50, cats.sumOf { it.count })
+        assertEquals(18, cats.first { it.category == "EQUITY" }.count)
     }
 
     @Test
     fun `sub-categories list distinct fund types with counts`() {
         val subs = service.subCategories()
-        assertEquals(36, subs.sumOf { it.count })
+        assertEquals(50, subs.sumOf { it.count })
         val smallCap = subs.first { it.subCategory == "Small Cap" }
         assertEquals("EQUITY", smallCap.category)
-        assertEquals(2, smallCap.count) // SBI + Nippon
-        assertEquals(3, subs.first { it.subCategory == "Large Cap" }.count)
+        assertEquals(3, smallCap.count) // SBI + Nippon + Quant
+        assertEquals(4, subs.first { it.subCategory == "Large Cap" }.count)
     }
 
     @Test
     fun `search filters by sub-category`() {
         val smallCaps = service.search(null, FundCategory.EQUITY, null, null, 0, 50, "Small Cap")
-        assertEquals(2, smallCaps.totalElements)
+        assertEquals(3, smallCaps.totalElements)
         assertTrue(smallCaps.content.all { it.subCategory == "Small Cap" })
     }
 
     @Test
     fun `market pulse ranks recent gainers, losers and category moves`() {
         val pulse = service.marketPulse(5)
-        assertEquals(36, pulse.fundCount)
+        assertEquals(50, pulse.fundCount)
         assertEquals(5, pulse.topGainers.size)
         assertEquals(5, pulse.topLosers.size)
         assertEquals(8, pulse.categoryMovers.size)

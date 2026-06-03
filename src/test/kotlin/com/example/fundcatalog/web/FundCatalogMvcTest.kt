@@ -60,7 +60,7 @@ class FundCatalogMvcTest {
     fun `explore search returns a cached page`() {
         val res = mvc.perform(get("/funds?sort=rating&page=0&size=6").headers(auth())).andReturn().response
         assertEquals(200, res.status)
-        assertTrue(res.contentAsString.contains("\"totalElements\":36"))
+        assertTrue(res.contentAsString.contains("\"totalElements\":50"))
         assertNotNull(res.getHeader("Cache-Control"))
     }
 

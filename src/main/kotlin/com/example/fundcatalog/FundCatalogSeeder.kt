@@ -91,6 +91,21 @@ class FundCatalogSeeder(
             fund("Motilal Oswal Nasdaq 100 FoF", "Motilal Oswal", INTERNATIONAL, "Nasdaq 100", VERY_HIGH, "0.58", "4700", 5, "29.4", "21.8", "22.6", "34.12", "Nasdaq 100 TRI (INR)", "Ankush Sood", "145552"),
             fund("Franklin India Feeder US Opp", "Franklin Templeton", INTERNATIONAL, "US Equity", VERY_HIGH, "0.62", "3300", 4, "24.1", "18.7", "19.9", "68.45", "Russell 3000 (INR)", "Sandeep Manam"),
             fund("Edelweiss Gr China Equity FoF", "Edelweiss MF", INTERNATIONAL, "Greater China", VERY_HIGH, "1.43", "1500", 2, "12.6", "4.2", "8.8", "27.30", "MSCI Golden Dragon", "Bhavesh Jain", "140243"),
+            // --- A wider universe across every category ---
+            fund("Nippon India Large Cap", "Nippon India", EQUITY, "Large Cap", HIGH, "1.59", "29800", 5, "22.4", "19.8", "16.9", "84.21", "Nifty 100 TRI", "Sailesh Raj Bhan"),
+            fund("Motilal Oswal Midcap", "Motilal Oswal", EQUITY, "Mid Cap", VERY_HIGH, "1.62", "14600", 5, "33.5", "28.7", "23.4", "98.44", "Nifty Midcap 150", "Niket Shah"),
+            fund("Quant Small Cap", "Quant MF", EQUITY, "Small Cap", VERY_HIGH, "1.64", "26100", 5, "36.8", "31.2", "29.7", "276.30", "Nifty Smallcap 250", "Sandeep Tandon"),
+            fund("HDFC Mid-Cap Opportunities", "HDFC MF", EQUITY, "Mid Cap", VERY_HIGH, "1.43", "73400", 5, "29.1", "26.0", "22.3", "189.55", "Nifty Midcap 150", "Chirag Setalvad"),
+            fund("Kotak Flexicap", "Kotak MF", EQUITY, "Flexi Cap", VERY_HIGH, "1.46", "51200", 4, "20.7", "18.1", "16.4", "82.90", "Nifty 500 TRI", "Harsha Upadhyaya"),
+            fund("Franklin India Focused Equity", "Franklin Templeton", EQUITY, "Focused", VERY_HIGH, "1.72", "11200", 4, "23.9", "21.0", "18.5", "104.18", "Nifty 500 TRI", "Roshi Jain"),
+            fund("Axis Banking & PSU Debt", "Axis MF", DEBT, "Banking & PSU", LOW_TO_MODERATE, "0.36", "14200", 4, "7.1", "6.6", "6.9", "2456.70", "NIFTY Banking & PSU", "Aditya Pagaria"),
+            fund("SBI Magnum Medium Duration", "SBI MF", DEBT, "Medium Duration", MODERATE, "0.71", "6900", 4, "7.8", "7.1", "7.4", "47.32", "CRISIL Medium Term", "Lokesh Mallya"),
+            fund("Kotak Equity Hybrid", "Kotak MF", HYBRID, "Aggressive Hybrid", MODERATELY_HIGH, "1.74", "5600", 4, "16.0", "14.5", "13.4", "52.18", "CRISIL Hybrid 35+65", "Pankaj Tibrewal"),
+            fund("DSP ELSS Tax Saver", "DSP MF", ELSS, "ELSS", VERY_HIGH, "1.58", "15700", 4, "23.1", "20.1", "17.9", "112.44", "Nifty 500 TRI", "Rohit Singhania"),
+            fund("ICICI Pru Liquid", "ICICI Prudential", LIQUID, "Liquid", LOW, "0.20", "48600", 4, "7.0", "5.6", "5.5", "362.18", "CRISIL Liquid", "Rahul Goswami"),
+            fund("SBI Gold Fund", "SBI MF", GOLD, "Gold FoF", HIGH, "0.42", "1800", 4, "15.2", "12.8", "12.4", "22.07", "Domestic Gold Price", "Raviprakash Sharma"),
+            fund("Nippon India Nifty Midcap 150 Index", "Nippon India", INDEX, "Nifty Midcap 150", VERY_HIGH, "0.30", "1400", 4, "28.0", "24.5", "21.6", "18.62", "Nifty Midcap 150 TRI", "Himanshu Mange"),
+            fund("PGIM India Global Equity Opp", "PGIM India", INTERNATIONAL, "Global", VERY_HIGH, "1.39", "1600", 3, "21.5", "12.4", "14.9", "29.85", "MSCI ACWI (INR)", "Ravi Adukia"),
         )
         funds.saveAll(universe)
 
